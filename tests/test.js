@@ -9,7 +9,7 @@ function expect(val) {
 }
 
 function testMachine() {
-    var m = new Machine(10, 255, 1000);
+    var m = new Machine(10, 255, 100);
 
     print("Should have 10 as a valid slot");
     expect(m.validSlot(10));
@@ -98,3 +98,5 @@ testGet(m);
 //testS();
 //testK();
 //...
+
+m.print();
