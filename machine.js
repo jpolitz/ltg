@@ -136,10 +136,22 @@ Machine.prototype.rightApply = function(slot, card) {
     }
 }
 
+Machine.prototype.zombieMoves() {
+    this.zombie = true;
+    for(var i = 0; i < this.slots[proponent].length; i++) {
+        var slot = this.slots[proponent][i];
+        if(slot.vitality === -1) {
+            slot.field(id);
+        }
+    }
+    this.zombie = false;
+}
+
 Machine.prototype.move = function(slot, card, left) {
     if(!this.validSlot(slot)) {
         throw "Bad slot";
     }
+    this.zombieMoves();
     if(left) {
         this.leftApply(slot, card);
     }
