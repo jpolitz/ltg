@@ -1,6 +1,7 @@
 
 
 function turn(machine) {
+    print("---------------------------------------------");
     print("It is player" + machine.proponent + "'s turn.");
     function getSlot() {
         print("Give a slot #");
@@ -22,11 +23,14 @@ function turn(machine) {
         getCard();
     }
 
-    print("Type L for left apply, something else for right apply");
-    var left = this.readline() === "L";
-    print(left);
+    print("Type L for left apply, something else for right apply (or quit)");
+    var leftStr = this.readline();
+    if(leftStr === "quit") { quit(); }
+    var left = leftStr === "L";
     var slot = getSlot();
     var card = getCard();
+    
+    machine.move(slot, card, left);
 }
 
 function play(m) {

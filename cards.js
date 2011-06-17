@@ -360,8 +360,10 @@ var Zombie = { make:
                            return id;
                        };
                        g.card = "ZombieX";
+                       return g;
                    };
                    f.card = "ZombieI";
+                   return f;
                }};
 
 var CARDS =

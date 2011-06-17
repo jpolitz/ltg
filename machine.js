@@ -50,7 +50,7 @@ Machine.prototype.getProponentSlotOpposite = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getProponentSlotOpposite";
     }
-    return this.getProponentSlot(machine.maxSlots - i);
+    return this.getProponentSlot(this.maxSlots - i);
 }
 
 Machine.prototype.getOpponentSlot = function(i) {
@@ -64,7 +64,7 @@ Machine.prototype.getOpponentSlotOpposite = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getOpponentSlotOpposite";
     }
-    return this.getOpponentSlot(machine.maxSlots - i);
+    return this.getOpponentSlot(this.maxSlots - i);
 }
 
 Machine.prototype.endTurn = function() { 
