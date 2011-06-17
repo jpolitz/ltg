@@ -1,7 +1,9 @@
+var id = function(x) { return x; }
+
 var Machine = function(maxSlots, maxVitality, initVitality) {
     var initSlots = function(slots) { 
         for(var i = 0; i < maxSlots; i++) {
-            slots[i] = {field : function(x) { return x; },
+            slots[i] = {field : id,
                         vitality : initVitality};
         }
     }
@@ -14,6 +16,7 @@ var Machine = function(maxSlots, maxVitality, initVitality) {
     initSlots(this.player1Slots);
     this.slots = [this.player0Slots, this.player1Slots];
     this.proponent = 0;
+    this.zombie = false;
 }
 
 Machine.prototype.validSlot = function(num) {
@@ -37,7 +40,7 @@ Machine.prototype.getProponentSlot = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getProponentSlot";
     }
-    return this.slots[this.proponent];
+    return this.slots[this.proponent][i];
 }
 
 Machine.prototype.getProponentSlotOpposite = function(i) {
@@ -51,7 +54,7 @@ Machine.prototype.getOpponentSlot = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getOpponentSlot";
     }
-    return this.slots[1 - this.proponent];
+    return this.slots[1 - this.proponent][i];
 }
 
 Machine.prototype.getOpponentSlotOpposite = function(i) {

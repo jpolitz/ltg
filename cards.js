@@ -1,6 +1,6 @@
 function id(x) { return x; }
 
-var DEBUG = true;
+var DEBUG = false;
 function error(extra) {
     if(DEBUG) {
         print("ERROR: " + extra);
@@ -24,7 +24,10 @@ var Succ = { make:
                      if(typeof n !== "number") {
                          return error("Succ");
                      }
-                     return n + 1;
+                     if(n < machine.maxVitality) {
+                         return n + 1;
+                     }
+                     return machine.maxVitality;
                  }
              }};
 
@@ -54,9 +57,7 @@ var Get = { make:
 
 var Put = { make:
             function(machine) {
-                return function(i) {
-                    return function(x) { return x; }
-                };
+                return function(i) { return id; };
             }};
 
 // Card "S" is a function that takes an argument f and returns another
@@ -122,11 +123,18 @@ var Inc = { make:
                         return error("Inc");
                     }
                     var slot = machine.getProponentSlot(i);
-                    if(slot.vitality < machine.maxVitality && 
-                       slot.vitality > 0) {
-                        slot.vitality += 1;
+                    if(!machine.zombie) {
+                        if(slot.vitality < machine.maxVitality && 
+                           slot.vitality > 0) {
+                            slot.vitality += 1;
+                        }
                     }
-                    return function(x) { return x; }
+                    else {
+                        if(slot.vitality > 0) {
+                            slot.vitality -= 1;
+                        }
+                    }
+                    return id;
                 };
             }};
 
@@ -137,10 +145,18 @@ var Dec = { make:
                         return error("Dec");
                     }
                     var slot = machine.getOpponentSlot(i);
-                    if(slot.vitality > 0) {
-                        slot.vitality -= 1;
+                    if(!machine.zombie) {
+                        if(slot.vitality > 0) {
+                            slot.vitality -= 1;
+                        }
                     }
-                    return function(x) { return x; };
+                    else {
+                        if(slot.vitality < machine.maxVitality &&
+                           slot.vitality > 0) {
+                            slot.vitality += 1;
+                        }
+                    }
+                    return id;
                 };
             }};
 
@@ -185,8 +201,17 @@ var Attack = { make:
                                if(machine.deadSlot(oppSlot)) {
                                    return id;
                                }
-                               var newVitality = oppSlot.vitality - Math.floor(n * (9/10));
-                               if(newVitality < 0) { newVitality = 0 }
+                               var newVitality;
+                               if(!machine.zombie) {
+                                   newVitality = oppSlot.vitality - Math.floor(n * (9/10));
+                                   if(newVitality < 0) { newVitality = 0 }
+                               }
+                               else {
+                                   newVitality = oppSlot.vitality + Math.floor(n * (9/10));
+                                   if(newVitality > machine.maxVitality) {
+                                       newVitality = machine.maxVitality;
+                                   }
+                               }
                                oppSlot.vitality = newVitality;
                            }
                        }
@@ -231,12 +256,68 @@ var Help = { make:
                                  return error("Help - j");
                              }
                              var gainSlot = machine.getProponentSlotOpposite(j);
-                             var newVitality = gainSlot + Math.floor((11/10) * n);
-                             if(newVitality > machine.maxVitality) {
-                                 newVitality = machine.maxVitality;
+                             var newVitality;
+                             if(!machine.zombie) {
+                                 newVitality = gainSlot + Math.floor((11/10) * n);
+                                 if(newVitality > machine.maxVitality) {
+                                     newVitality = machine.maxVitality;
+                                 }
+                             }
+                             else {
+                                 newVitality = gainSlot - Math.floor((11/10) * n);
+                                 if(newVitality < 0) {
+                                     newVitality = 0;
+                                 }
+
                              }
                              return id;
                          }
                      }
                  }
              }};
+
+// Card "copy" is a function that takes an argument i, and returns the
+// value of the field of the ith slot of the opponent. It raises an
+// error if i is not a valid slot number. Note that the slot is ith,
+// not (255-i)th.
+var Copy = { make:
+             function(machine) {
+                 return function(i) {
+                     if(!machine.validSlot(i)) {
+                         return error("Copy - i");
+                     }
+                     return machine.getOpponentSlot(i).field;
+                 }
+             }};
+
+var Revive = { make:
+               function(machine) {
+                   return function(i) {
+                       if(!machine.validSlot(i)) {
+                           return error("Revive - i");
+                       }
+                       var saveSlot = machine.getProponentSlot(i);
+                       if(saveSlot.vitality <= 0) {
+                           saveSlot.vitality = 1;
+                       }
+                       return id;
+                   };
+               }};
+
+var Zombie = { make:
+               function(machine) {
+                   return function(i) {
+                       return function(x) {
+                           if(!machine.validSlot(i)) {
+                               return error("Zombie - i");
+                           }
+                           var slot = machine.getOpponentSlotOpposite(i);
+                           if(!machine.deadSlot(slot)) {
+                               return error("Zombie - slot not dead");
+                           }
+                           slot.field = x;
+                           slot.vitality = -1;
+                           return id;
+                       }
+                   }
+               }};
