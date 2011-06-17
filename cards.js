@@ -10,7 +10,9 @@ function error(extra) {
 
 var Ident = { make:
               function(machine) { 
-                  return function(x) { return x; }
+                  var f = function(x) { return x; };
+                  f.card = "I";
+                  return f;
               }};
 
 var Zero = { make:
@@ -20,7 +22,7 @@ var Zero = { make:
 
 var Succ = { make:
              function(machine) {
-                 return function(n) {
+                 var f = function(n) {
                      if(typeof n !== "number") {
                          return error("Succ");
                      }
@@ -28,12 +30,14 @@ var Succ = { make:
                          return n + 1;
                      }
                      return machine.maxVitality;
-                 }
+                 };
+                 f.card = "succ";
+                 return f;
              }};
 
 var Dbl = { make:
             function(machine) {
-                return function(n) {
+                var f = function(n) {
                     if(typeof n !== "number") {
                         return error("Dbl");
                     }
@@ -43,21 +47,27 @@ var Dbl = { make:
                     }
                     return dbl;
                 };
+                f.card = "dbl";
+                return f;
             }};
 
 var Get = { make:
             function(machine) {
-                return function(i) {
+                var f = function(i) {
                     if(!machine.validSlot(i)) {
                         return error("Get");
                     }
                     return machine.getProponentSlot(i).field;
                 };
+                f.card = "get";
+                return f;
             }};
 
 var Put = { make:
             function(machine) {
-                return function(i) { return id; };
+                var f = function(i) { return id; };
+                f.card = "put";
+                return f;
             }};
 
 // Card "S" is a function that takes an argument f and returns another
@@ -72,9 +82,9 @@ var Put = { make:
 // lambda-calculus.]
 var S = { make:
           function(machine) {
-              return function(f) {
-                  return function(g) {
-                      return function(x) {
+              var f = function(f) {
+                  var g = function(g) {
+                      var x = function(x) {
                           if(typeof f !== "function") {
                               return error("S - f");
                           }
@@ -89,8 +99,14 @@ var S = { make:
                           var z = h(y);
                           return z;
                       };
+                      x.card = "Sx";
+                      return x;
                   };
+                  g.card = "Sg";
+                  return g;
               };
+              f.card = "Sf";
+              return f;
           }};
 
 // Card "K" is a function that takes an argument x and returns another
@@ -99,11 +115,15 @@ var S = { make:
 // combinator and written λx.λy.x in lambda-calculus.]
 var K = { make:
           function(machine) {
-              return function(x) {
-                  return function(y) {
+              var f = function(x) {
+                  var g = function(y) {
                       return x;
                   };
+                  g.card = "Ky";
+                  return g;
               };
+              f.card = "Kx";
+              return f;
           }};
 
 // Card "inc" is a function that takes an argument i, and
@@ -118,7 +138,7 @@ var K = { make:
 // and returns the identity function.
 var Inc = { make:
             function(machine) {
-                return function(i) {
+                var f = function(i) {
                     if(!machine.validSlot(i)) {
                         return error("Inc");
                     }
@@ -136,11 +156,13 @@ var Inc = { make:
                     }
                     return id;
                 };
+                f.card = "Inc";
+                return f;
             }};
 
 var Dec = { make:
             function(machine) {
-                return function(i) {
+                var f = function(i) {
                     if(!machine.validSlot(i)) {
                         return error("Dec");
                     }
@@ -158,6 +180,8 @@ var Dec = { make:
                     }
                     return id;
                 };
+                f.card = "Dec";
+                return f;
             }};
 
 // Card "attack" is a function that takes an argument i and returns
@@ -179,9 +203,9 @@ var Dec = { make:
 // and return the identity function.
 var Attack = { make:
                function(machine) {
-                   return function(i) {
-                       return function(j) {
-                           return function(n) {
+                   var f = function(i) {
+                       var g = function(j) {
+                           var h = function(n) {
                                if(!machine.validSlot(i)) {
                                    return error("Attack - i");
                                }
@@ -213,9 +237,15 @@ var Attack = { make:
                                    }
                                }
                                oppSlot.vitality = newVitality;
-                           }
-                       }
-                   }
+                           };
+                           h.card = "AttackN";
+                           return h;
+                       };
+                       g.card = "AttackJ";
+                       return g;
+                   };
+                   f.card = "AttackI";
+                   return f;
                }};
 
 // Card "help" is a function that takes an argument i and returns
@@ -237,9 +267,9 @@ var Attack = { make:
 // and return the identity function.
 var Help = { make:
              function(machine) {
-                 return function(i) {
-                     return function(j) {
-                         return function(n) {
+                 var f = function(i) {
+                     var g = function(j) {
+                         var h = function(n) {
                              if(!machine.validSlot(i)) {
                                  return error("Help - i");
                              }
@@ -271,9 +301,15 @@ var Help = { make:
 
                              }
                              return id;
-                         }
-                     }
-                 }
+                         };
+                         h.card = "HelpN";
+                         return h;
+                     };
+                     g.card = "HelpJ";
+                     return g;
+                 };
+                 f.card = "HelpI";
+                 return f;
              }};
 
 // Card "copy" is a function that takes an argument i, and returns the
@@ -282,17 +318,19 @@ var Help = { make:
 // not (255-i)th.
 var Copy = { make:
              function(machine) {
-                 return function(i) {
+                 var f = function(i) {
                      if(!machine.validSlot(i)) {
                          return error("Copy - i");
                      }
                      return machine.getOpponentSlot(i).field;
-                 }
+                 };
+                 f.card = "Copy";
+                 return f;
              }};
 
 var Revive = { make:
                function(machine) {
-                   return function(i) {
+                   var f = function(i) {
                        if(!machine.validSlot(i)) {
                            return error("Revive - i");
                        }
@@ -302,12 +340,14 @@ var Revive = { make:
                        }
                        return id;
                    };
+                   f.card = "Revive";
+                   return f;
                }};
 
 var Zombie = { make:
                function(machine) {
-                   return function(i) {
-                       return function(x) {
+                   var f = function(i) {
+                       var g = function(x) {
                            if(!machine.validSlot(i)) {
                                return error("Zombie - i");
                            }
@@ -318,6 +358,25 @@ var Zombie = { make:
                            slot.field = x;
                            slot.vitality = -1;
                            return id;
-                       }
-                   }
+                       };
+                       g.card = "ZombieX";
+                   };
+                   f.card = "ZombieI";
                }};
+
+var CARDS =
+    {"I" : Ident,
+     "zero" : Zero,
+     "succ" : Succ,
+     "dbl" : Dbl,
+     "get" : Get,
+     "put" : Put,
+     "S" : S,
+     "K" : K,
+     "inc" : Inc,
+     "dec" : Dec,
+     "attack" : Attack,
+     "help" : Help,
+     "copy" : Copy,
+     "revive" : Revive,
+     "zombie" : Zombie}
