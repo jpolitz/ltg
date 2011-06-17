@@ -1,0 +1,7 @@
+R
+0
+zombie
+R
+2
+attack
+quit
