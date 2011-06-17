@@ -4,7 +4,7 @@ function turn(machine) {
     print("It is player" + machine.proponent + "'s turn.");
     function getSlot() {
         print("Give a slot #");
-        var slot = Number(readLine());
+        var slot = Number(this.readline());
         if(!machine.validSlot(slot)) {
             print("Bad slot, try again");
             getSlot();
@@ -14,8 +14,8 @@ function turn(machine) {
 
     function getCard() {
         print("Give a card name: ");
-        var cardName = readLine();
-        if(Object.hasOwnProperty(CARDS, cardName)) {
+        var cardName = readline();
+        if(cardName in CARDS) {
             return CARDS[cardName];
         }
         print("Bad card name: " + cardName);
@@ -23,12 +23,15 @@ function turn(machine) {
     }
 
     print("Type L for left apply, something else for right apply");
-    var left = readLine() === "L";
-
+    var left = this.readline() === "L";
+    print(left);
     var slot = getSlot();
     var card = getCard();
 }
 
 function play(m) {
-    while(true) { turn(m); }
+    while(true) { 
+        m.print();
+        turn(m); 
+    }
 }
