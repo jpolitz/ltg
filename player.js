@@ -1,6 +1,8 @@
 function selectPlan(machine) {
-    return mkChain(mkNum(machine, 0, 54),
-                   mkCopy(machine, 0, 7));
+    print("planselect");
+    return mkChain(mkChain(mkNum(machine, 0, 54),
+                           mkCopy(machine, 0, 7)),
+                   mkApply(machine,5,7));
 }
 
 function play(machine) {
@@ -8,6 +10,7 @@ function play(machine) {
     var currPlan = selectPlan(machine);
     currMove = currPlan.next();
     do {
+        print(currMove.slot);
         machine.move(currMove.slot, currMove.card, currMove.type === "L");
         currMove = currPlan.next();
         machine.print();

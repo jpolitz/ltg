@@ -64,6 +64,64 @@ function mkCopy(machine, i, j) {
         }};
 }
 
+// Assume that slot I is a function, and
+// apply that to the number n
+function mkKCount(machine, i, n) {
+    if (typeof n !== 'number') {
+        return errorPlan("Not a number in mkKCount: " + n);
+    }
+    if (typeof i !== 'number') {
+        return errorPlan("Not a number in mkKCount: " + i);
+    }
+
+    function getList(n) {
+        if(n == 0) { 
+            return [{type: "R", card: Zero, slot: i}] 
+        }
+        if((n % 2) == 0) { 
+            var arr = getList(n / 2);
+            var cmd = [{type: "L", card: K, slot: i},
+                       {type: "L", card: S, slot: i},
+                       {type: "R", card: Dbl, slot: i}];
+
+            return cmd.concat(arr);
+        }
+        var arr = getList(n - 1);
+        var cmd = [{type: "L", card: K, slot: i},
+                   {type: "L", card: S, slot: i},
+                   {type: "R", card: Succ, slot: i}];
+        return cmd.concat(arr);
+    }
+    var list = getList(n);
+    var ix = 0;
+    return {
+        next: function() {
+            if(ix >= list.length) {
+                return nullMove;
+            }
+            var move = list[ix];
+            ix += 1;
+            return move;
+        }};
+}
+
+// applies i to j, with the result in i
+function mkApply(machine, i, j) {
+    var list = [{type: "L", card: K, slot: i},
+                {type: "L", card: S, slot: i},
+                {type: "R", card: Get, slot: i}];
+    var cPlan = mkKCount(machine, i, j);
+    var ix = 0;
+
+    return {
+        next: function() {
+            if(ix >= list.length) {
+                return cPlan.next();
+            }
+            return list[ix++];
+        }};
+}
+
 function mkChain(plan1, plan2) {
     return {
         next: function() {

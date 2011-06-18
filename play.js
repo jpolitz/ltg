@@ -11,13 +11,11 @@ function turn(machine) {
         return slot;
     }
 
-    var cards = mkCards(machine);
-
     function getCard() {
         print("Give a card name: ");
         var cardName = readline();
-        if(cardName in cards) {
-            return cards[cardName];
+        if(cardName in CARDS) {
+            return CARDS[cardName];
         }
         print("Bad card name: " + cardName);
         getCard();
