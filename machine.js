@@ -136,10 +136,10 @@ Machine.prototype.rightApply = function(slot, card) {
     }
 }
 
-Machine.prototype.zombieMoves() {
+Machine.prototype.zombieMoves = function () {
     this.zombie = true;
-    for(var i = 0; i < this.slots[proponent].length; i++) {
-        var slot = this.slots[proponent][i];
+    for(var i = 0; i < this.slots[this.proponent].length; i++) {
+        var slot = this.slots[this.proponent][i];
         if(slot.vitality === -1) {
             slot.field(id);
         }
