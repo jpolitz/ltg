@@ -1,4 +1,5 @@
 function id(x) { return x; }
+id.card = "I";
 
 var DEBUG = false;
 function error(extra) {
@@ -8,11 +9,17 @@ function error(extra) {
     throw {extra : extra, tag: "interp"};
 }
 
+var wrap = function(machine, f) {
+    var wrapped = function(arg) { return machine.call(f, arg); }
+    wrapped.card = f.card;
+    return wrapped;
+}
+
 var Ident = { make:
               function(machine) { 
                   var f = function(x) { return x; };
                   f.card = "I";
-                  return f;
+                  return wrap(machine, f);
               }};
 
 var Zero = { make:
@@ -32,7 +39,7 @@ var Succ = { make:
                      return machine.maxVitality;
                  };
                  f.card = "succ";
-                 return f;
+                 return wrap(machine, f);
              }};
 
 var Dbl = { make:
@@ -48,7 +55,7 @@ var Dbl = { make:
                     return dbl;
                 };
                 f.card = "dbl";
-                return f;
+                return wrap(machine, f);
             }};
 
 var Get = { make:
@@ -60,14 +67,14 @@ var Get = { make:
                     return machine.getProponentSlot(i).field;
                 };
                 f.card = "get";
-                return f;
+                return wrap(machine, f);
             }};
 
 var Put = { make:
             function(machine) {
-                var f = function(i) { return id; };
+                var f = function(i) { return wrap(machine, id); };
                 f.card = "put";
-                return f;
+                return wrap(machine, f);
             }};
 
 // Card "S" is a function that takes an argument f and returns another
@@ -100,13 +107,13 @@ var S = { make:
                           return z;
                       };
                       x.card = "Sx";
-                      return x;
+                      return wrap(machine, x);
                   };
                   g.card = "Sg";
-                  return g;
+                  return wrap(machine, g);
               };
               f.card = "Sf";
-              return f;
+              return wrap(machine, f);
           }};
 
 // Card "K" is a function that takes an argument x and returns another
@@ -120,10 +127,10 @@ var K = { make:
                       return x;
                   };
                   g.card = "Ky";
-                  return g;
+                  return wrap(machine, g);
               };
               f.card = "Kx";
-              return f;
+              return wrap(machine, f);
           }};
 
 // Card "inc" is a function that takes an argument i, and
@@ -154,10 +161,10 @@ var Inc = { make:
                             slot.vitality -= 1;
                         }
                     }
-                    return id;
+                    return wrap(machine, id);
                 };
                 f.card = "Inc";
-                return f;
+                return wrap(machine, f);
             }};
 
 var Dec = { make:
@@ -178,10 +185,10 @@ var Dec = { make:
                             slot.vitality += 1;
                         }
                     }
-                    return id;
+                    return wrap(machine, id);
                 };
                 f.card = "Dec";
-                return f;
+                return wrap(machine, f);
             }};
 
 // Card "attack" is a function that takes an argument i and returns
@@ -238,16 +245,16 @@ var Attack = { make:
                                    }
                                }
                                oppSlot.vitality = newVitality;
-                               return id;
+                               return wrap(machine, id);
                            };
                            h.card = "AttackN";
-                           return h;
+                           return wrap(machine, h);
                        };
                        g.card = "AttackJ";
-                       return g;
+                       return wrap(machine, g);
                    };
                    f.card = "AttackI";
-                   return f;
+                   return wrap(machine, f);
                }};
 
 // Card "help" is a function that takes an argument i and returns
@@ -307,17 +314,16 @@ var Help = { make:
 
                              }
                              gainSlot.vitality = newVitality;
-                             machine.print();
-                             return id;
+                             return wrap(machine, id);
                          };
                          h.card = "HelpN";
-                         return h;
+                         return wrap(machine, h);
                      };
                      g.card = "HelpJ";
-                     return g;
+                     return wrap(machine, g);
                  };
                  f.card = "HelpI";
-                 return f;
+                 return wrap(machine, f);
              }};
 
 // Card "copy" is a function that takes an argument i, and returns the
@@ -333,7 +339,7 @@ var Copy = { make:
                      return machine.getOpponentSlot(i).field;
                  };
                  f.card = "Copy";
-                 return f;
+                 return wrap(machine, f);
              }};
 
 var Revive = { make:
@@ -346,10 +352,10 @@ var Revive = { make:
                        if(saveSlot.vitality <= 0) {
                            saveSlot.vitality = 1;
                        }
-                       return id;
+                       return wrap(machine, id);
                    };
                    f.card = "Revive";
-                   return f;
+                   return wrap(machine, f);
                }};
 
 var Zombie = { make:
@@ -365,13 +371,13 @@ var Zombie = { make:
                            }
                            slot.field = x;
                            slot.vitality = -1;
-                           return id;
+                           return wrap(machine, id);
                        };
                        g.card = "ZombieX";
-                       return g;
+                       return wrap(machine, g);
                    };
                    f.card = "ZombieI";
-                   return f;
+                   return wrap(machine, f);
                }};
 
 var CARDS =

@@ -65,7 +65,7 @@ function mkCopy(machine, i, j) {
 }
 
 // Assume that slot I is a function, and
-// apply that to the number n
+// apply that to the number n.  Takes 6lg(n) steps in the worst case
 function mkApplyN(machine, i, n) {
     if (typeof n !== 'number') {
         return errorPlan("Not a number in mkApplyN: " + n);
@@ -146,6 +146,10 @@ function mkHelp(machine, helpSlot, i, j, n) {
                         mkApplyN(machine, helpSlot, i),
                         mkApplyN(machine, helpSlot, j),
                         mkApplyN(machine, helpSlot, n)]);
+}
+
+function loop(machine, i, j) {
+    
 }
 
 function mkChain(plan1, plan2) {

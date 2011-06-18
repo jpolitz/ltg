@@ -20,6 +20,8 @@ var Machine = function(maxSlots, maxVitality, initVitality) {
     this.slots = [this.player0Slots, this.player1Slots];
     this.proponent = 0;
     this.zombie = false;
+    this.calls = 0;
+    this.callLimit = 1000;
 }
 
 Machine.prototype.validSlot = function(num) {
@@ -71,6 +73,14 @@ Machine.prototype.endTurn = function() {
     this.proponent = 1 - this.proponent;
 }
 
+Machine.prototype.call = function(f, arg) {
+    if(this.calls > this.callLimit) {
+        throw {tag: "interp", extra: "Call limit reached"};
+    }
+    this.calls += 1;
+    return f(arg);
+}
+
 Machine.prototype.printInfo = function() {
     print("Slots: " + this.maxSlots);
     print("Starting vita: " + this.initVitality);
@@ -89,7 +99,11 @@ Machine.prototype.printSlots = function(slots) {
         if (fld === id) {
             return "id";
         }
-        if (!fld.card) { throw "not a card!"; }
+        if (!fld.card) { 
+            print(fld);
+            print(fld.card);
+            throw "not a card!"; 
+        }
         return fld.card;
     }
             
@@ -172,6 +186,7 @@ Machine.prototype.move = function(slot, card, left) {
     else {
         this.rightApply(slot, card);
     }
+    this.calls = 0;
 }
 
 Machine.prototype.turn = function(slot, card, left) {

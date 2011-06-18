@@ -1,9 +1,12 @@
+var ix = 0;
 function runPlan(machine, plan) {
     var currMove = plan.next();
     while(!isNullMove(currMove)) {
         machine.move(currMove.slot, currMove.card, currMove.type === "L");
+        ix++
         currMove = plan.next();
     }
+    print("Plans have taken " + ix + " turns.");
     return;
 }
 
@@ -23,7 +26,6 @@ function kill(machine) {
                               attackerSlot,
                               machine.getProponentSlot(attackerSlot).vitality - 1);
             runPlan(machine, plan);
-            machine.print();
             count++
         }
         var plan = mkAttack(machine, 
