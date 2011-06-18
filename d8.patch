@@ -1,0 +1,98 @@
+Index: src/d8.cc
+===================================================================
+--- src/d8.cc	(revision 8322)
++++ src/d8.cc	(working copy)
+@@ -175,7 +175,26 @@
+   return Undefined();
+ }
+ 
++Handle<Value> Shell::PrintStdErr(const Arguments& args) {
++  for (int i = 0; i < args.Length(); i++) {
++    HandleScope handle_scope;
++    if (i != 0) {
++      fprintf(stderr, " ");
++    }
++    v8::String::Utf8Value str(args[i]);
++    int n = fwrite(*str, sizeof(**str), str.length(), stderr);
++    if (n != str.length()) {
++      printf("Error in fwrite\n");
++      exit(1);
++    }
++  }
++  fprintf(stderr, "\n");
++  fflush(stderr);
+ 
++  return Undefined();
++}
++
++
+ Handle<Value> Shell::Read(const Arguments& args) {
+   String::Utf8Value file(args[0]);
+   if (*file == NULL) {
+@@ -544,6 +563,7 @@
+ Handle<ObjectTemplate> Shell::CreateGlobalTemplate() {
+   Handle<ObjectTemplate> global_template = ObjectTemplate::New();
+   global_template->Set(String::New("print"), FunctionTemplate::New(Print));
++  global_template->Set(String::New("printstderr"), FunctionTemplate::New(Print));
+   global_template->Set(String::New("write"), FunctionTemplate::New(Write));
+   global_template->Set(String::New("read"), FunctionTemplate::New(Read));
+   global_template->Set(String::New("readline"),
+Index: src/d8.h
+===================================================================
+--- src/d8.h	(revision 8322)
++++ src/d8.h	(working copy)
+@@ -149,6 +149,7 @@
+ #endif
+ 
+   static Handle<Value> Print(const Arguments& args);
++  static Handle<Value> PrintStdErr(const Arguments& args);
+   static Handle<Value> Write(const Arguments& args);
+   static Handle<Value> Yield(const Arguments& args);
+   static Handle<Value> Quit(const Arguments& args);
+Index: samples/shell.cc
+===================================================================
+--- samples/shell.cc	(revision 8322)
++++ samples/shell.cc	(working copy)
+@@ -64,6 +64,7 @@
+                    bool print_result,
+                    bool report_exceptions);
+ v8::Handle<v8::Value> Print(const v8::Arguments& args);
++v8::Handle<v8::Value> PrintStdErr(const v8::Arguments& args);
+ v8::Handle<v8::Value> Read(const v8::Arguments& args);
+ v8::Handle<v8::Value> Load(const v8::Arguments& args);
+ v8::Handle<v8::Value> Quit(const v8::Arguments& args);
+@@ -377,6 +378,8 @@
+   v8::Handle<v8::ObjectTemplate> global = v8::ObjectTemplate::New();
+   // Bind the global 'print' function to the C++ Print callback.
+   global->Set(v8::String::New("print"), v8::FunctionTemplate::New(Print));
++  // Bind the global 'printstderr' function to the C++ Print callback.
++  global->Set(v8::String::New("printstderr"), v8::FunctionTemplate::New(PrintStdErr));
+   // Bind the global 'read' function to the C++ Read callback.
+   global->Set(v8::String::New("read"), v8::FunctionTemplate::New(Read));
+   // Bind the global 'load' function to the C++ Load callback.
+@@ -431,7 +434,25 @@
+   return v8::Undefined();
+ }
+ 
++v8::Handle<v8::Value> PrintStdErr(const v8::Arguments& args) {
++  bool first = true;
++  for (int i = 0; i < args.Length(); i++) {
++    v8::HandleScope handle_scope;
++    if (first) {
++      first = false;
++    } else {
++      fprintf(stderr, " ");
++    }
++    v8::String::Utf8Value str(args[i]);
++    const char* cstr = ToCString(str);
++    fprintf(stderr, "%s", cstr);
++  }
++  printf("\n");
++  fflush(stderr);
++  return v8::Undefined();
++}
+ 
++
+ // The callback that is invoked by v8 whenever the JavaScript 'read'
+ // function is called.  This function loads the content of the file named in
+ // the argument into a JavaScript string.
