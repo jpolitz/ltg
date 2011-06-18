@@ -122,7 +122,7 @@ Machine.prototype.leftApply = function(slot, card) {
             slot.field = id;
         }
         else {
-            print("Non-interp error");
+            print("Non-interp error " + e);
         }
     }
 }

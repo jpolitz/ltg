@@ -3,7 +3,7 @@ function turn(machine) {
     print("It is player" + machine.proponent + "'s turn.");
     function getSlot() {
         print("Give a slot #");
-        var slot = Number(this.readline());
+        var slot = Number(readline());
         if(!machine.validSlot(slot)) {
             print("Bad slot, try again");
             getSlot();
