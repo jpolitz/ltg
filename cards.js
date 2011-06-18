@@ -39,7 +39,7 @@ var Dbl = { make:
             function(machine) {
                 var f = function(n) {
                     if(typeof n !== "number") {
-                        return error("Dbl");
+                        return error("Dbl: n was " + n);
                     }
                     var dbl = n * 2;
                     if(dbl > machine.maxVitality) {
@@ -382,3 +382,22 @@ var CARDS =
      "copy" : Copy,
      "revive" : Revive,
      "zombie" : Zombie}
+
+var mkCards = function(machine) {
+    return {
+        "I" : Ident(machine),
+        "zero" : Zero(machine),
+        "succ" : Succ(machine),
+        "dbl" : Dbl(machine),
+        "get" : Get(machine),
+        "put" : Put(machine),
+        "S" : S(machine),
+        "K" : K(machine),
+        "inc" : Inc(machine),
+        "dec" : Dec(machine),
+        "attack" : Attack(machine),
+        "help" : Help(machine),
+        "copy" : Copy(machine),
+        "revive" : Revive(machine),
+        "zombie" : Zombie(machine)}
+}

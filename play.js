@@ -1,5 +1,3 @@
-
-
 function turn(machine) {
     print("---------------------------------------------");
     print("It is player" + machine.proponent + "'s turn.");
@@ -13,11 +11,13 @@ function turn(machine) {
         return slot;
     }
 
+    var cards = mkCards(machine);
+
     function getCard() {
         print("Give a card name: ");
         var cardName = readline();
-        if(cardName in CARDS) {
-            return CARDS[cardName];
+        if(cardName in cards) {
+            return cards[cardName];
         }
         print("Bad card name: " + cardName);
         getCard();

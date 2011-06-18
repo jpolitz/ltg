@@ -103,45 +103,54 @@ Machine.prototype.print = function() {
 }
 
 Machine.prototype.leftApply = function(slot, card) {
+    var slot = this.getProponentSlot(slot);
     try {
-        var slot = this.getProponentSlot(slot);
+        var fn = card.make(this);
+        if(typeof fn !== 'function') {
+            slot.field = id;
+            return;
+        }
         var result = card.make(this)(slot.field);
         slot.field = result;
     }
     catch(e) {
         if(e.tag === "interp") {
-            
+            slot.field = id;
         }
         else {
             print("Non-interp error");
-            print(e);
         }
     }
 }
 
 Machine.prototype.rightApply = function(slot, card) {
+    var slot = this.getProponentSlot(slot);
     try {
-        var slot = this.getProponentSlot(slot);
+        var fn = slot.field;
+        if(typeof fn !== 'function') {
+            slot.field = id;
+            return;
+        }
         var result = slot.field(card.make(this));
         slot.field = result;
     }
     catch(e) {
         if(e.tag === "interp") {
-            
+            slot.field = id;
         }
         else {
             print("Non-interp error");
-            print(e);
         }
     }
 }
 
-Machine.prototype.zombieMoves = function () {
+Machine.prototype.zombieMoves = function() {
     this.zombie = true;
     for(var i = 0; i < this.slots[this.proponent].length; i++) {
         var slot = this.slots[this.proponent][i];
         if(slot.vitality === -1) {
             slot.field(id);
+            slot.field = id;
         }
     }
     this.zombie = false;
@@ -158,5 +167,9 @@ Machine.prototype.move = function(slot, card, left) {
     else {
         this.rightApply(slot, card);
     }
+}
+
+Machine.prototype.turn = function(slot, card, left) {
+    this.move(slot, card, turn);
     this.endTurn();
 }
