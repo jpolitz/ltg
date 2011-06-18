@@ -1,6 +1,10 @@
 load("machine.js");
 load("cards.js");
 
+if (typeof printstderr == 'undefined') {
+    printstderr = function() { };
+}
+
 // Harness for running Machine against the public interface
 // per http://www.icfpcontest.org/2011/06/task-description-contest-starts-now.html
 
@@ -61,7 +65,7 @@ TournamentMachine.prototype = {
         this.machine.endTurn();
 
         // Debuggery.  TODO: Remove.
-        this.machine.print();
+        this.machine.print(printstderr);
     },
 
     run: function(playerNumber) {

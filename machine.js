@@ -71,13 +71,13 @@ Machine.prototype.endTurn = function() {
     this.proponent = 1 - this.proponent;
 }
 
-Machine.prototype.printInfo = function() {
-    print("Slots: " + this.maxSlots);
-    print("Starting vita: " + this.initVitality);
-    print("Max vita: " + this.maxVitality);
+Machine.prototype.printInfo = function(printFn) {
+    printFn("Slots: " + this.maxSlots);
+    printFn("Starting vita: " + this.initVitality);
+    printFn("Max vita: " + this.maxVitality);
 }
 
-Machine.prototype.printSlots = function(slots) {
+Machine.prototype.printSlots = function(printFn, slots) {
     var s = "";
     function fld(fld) { 
         if (typeof fld === 'undefined') {
@@ -94,15 +94,16 @@ Machine.prototype.printSlots = function(slots) {
     }
             
     for(var i = 0; i < slots.length; i++) {
-        s += "[(" + i + ") " + fld(slots[i].field) + "; " + slots[i].vitality + "]"
+        s += "[(" + i + ") " + fld(slots[i].field) + "; " + slots[i].vitality + "]";
     }
-    print(s);
+    printFn(s);
 }
 
-Machine.prototype.print = function() {
-    this.printInfo();
-    this.printSlots(this.player0Slots);
-    this.printSlots(this.player1Slots);
+Machine.prototype.print = function(printFn) {
+    printFn = printFn || print;
+    this.printInfo(printFn);
+    this.printSlots(printFn, this.player0Slots);
+    this.printSlots(printFn, this.player1Slots);
 }
 
 Machine.prototype.leftApply = function(slot, card) {
