@@ -66,12 +66,12 @@ function mkCopy(machine, i, j) {
 
 // Assume that slot I is a function, and
 // apply that to the number n
-function mkKCount(machine, i, n) {
+function mkApplyN(machine, i, n) {
     if (typeof n !== 'number') {
-        return errorPlan("Not a number in mkKCount: " + n);
+        return errorPlan("Not a number in mkApplyN: " + n);
     }
     if (typeof i !== 'number') {
-        return errorPlan("Not a number in mkKCount: " + i);
+        return errorPlan("Not a number in mkApplyN: " + i);
     }
 
     function getList(n) {
@@ -110,7 +110,7 @@ function mkApply(machine, i, j) {
     var list = [{type: "L", card: K, slot: i},
                 {type: "L", card: S, slot: i},
                 {type: "R", card: Get, slot: i}];
-    var cPlan = mkKCount(machine, i, j);
+    var cPlan = mkApplyN(machine, i, j);
     var ix = 0;
 
     return {
@@ -118,8 +118,34 @@ function mkApply(machine, i, j) {
             if(ix >= list.length) {
                 return cPlan.next();
             }
-            return list[ix++];
+            var move = list[ix];
+            ix += 1;
+            return move;
         }};
+}
+
+function mkPut(machine, i, card) {
+    var done = 0;
+    return {
+        next: function() {
+            if(done) return nullMove;
+            done = true; 
+            return {type: "R", card: card, slot: i};
+        }};
+}
+
+function mkAttack(machine, atkSlot, i, j, n) {
+    return mkChainList([mkPut(machine, atkSlot, Attack),
+                        mkApplyN(machine, atkSlot, i),
+                        mkApplyN(machine, atkSlot, j),
+                        mkApplyN(machine, atkSlot, n)]);
+}
+
+function mkHelp(machine, helpSlot, i, j, n) {
+    return mkChainList([mkPut(machine, helpSlot, Help),
+                        mkApplyN(machine, helpSlot, i),
+                        mkApplyN(machine, helpSlot, j),
+                        mkApplyN(machine, helpSlot, n)]);
 }
 
 function mkChain(plan1, plan2) {
@@ -132,3 +158,9 @@ function mkChain(plan1, plan2) {
             return move;
         }};
 }
+
+function mkChainList(plans) {
+    if(plans.length === 1) { return plans[0]; }
+    return mkChain(plans[0], mkChainList(plans.slice(1)));
+}
+

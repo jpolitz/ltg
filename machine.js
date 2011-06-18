@@ -50,7 +50,7 @@ Machine.prototype.getProponentSlotOpposite = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getProponentSlotOpposite";
     }
-    return this.getProponentSlot(this.maxSlots - i);
+    return this.getProponentSlot(this.maxSlots - i - 1);
 }
 
 Machine.prototype.getOpponentSlot = function(i) {
@@ -64,7 +64,7 @@ Machine.prototype.getOpponentSlotOpposite = function(i) {
     if(!this.validSlot(i)) {
         throw "Bad slot given to getOpponentSlotOpposite";
     }
-    return this.getOpponentSlot(this.maxSlots - i);
+    return this.getOpponentSlot(this.maxSlots - i - 1);
 }
 
 Machine.prototype.endTurn = function() { 
@@ -80,6 +80,9 @@ Machine.prototype.printInfo = function() {
 Machine.prototype.printSlots = function(slots) {
     var s = "";
     function fld(fld) { 
+        if (typeof fld === 'undefined') {
+            throw "fld was undefined";
+        }
         if (typeof fld === "number") {
             return String(fld);
         }
@@ -115,6 +118,7 @@ Machine.prototype.leftApply = function(slot, card) {
     }
     catch(e) {
         if(e.tag === "interp") {
+            print("Interp error: " + e.extra);
             slot.field = id;
         }
         else {
@@ -136,10 +140,11 @@ Machine.prototype.rightApply = function(slot, card) {
     }
     catch(e) {
         if(e.tag === "interp") {
+            print("Interp error: " + e.extra);
             slot.field = id;
         }
         else {
-            print("Non-interp error");
+            print("Non-interp error: " + e);
         }
     }
 }
@@ -158,7 +163,7 @@ Machine.prototype.zombieMoves = function() {
 
 Machine.prototype.move = function(slot, card, left) {
     if(!this.validSlot(slot)) {
-        throw "Bad slot";
+        throw "Bad slot: " + slot;
     }
     this.zombieMoves();
     if(left) {

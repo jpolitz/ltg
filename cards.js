@@ -24,7 +24,7 @@ var Succ = { make:
              function(machine) {
                  var f = function(n) {
                      if(typeof n !== "number") {
-                         return error("Succ");
+                         return error("Succ: " + n);
                      }
                      if(n < machine.maxVitality) {
                          return n + 1;
@@ -212,6 +212,7 @@ var Attack = { make:
                                if(typeof n !== "number") {
                                    return error("Attack - n");
                                }
+                               print("Attack: " + i + ", " + j + ", " + n);
                                var proSlot = machine.getProponentSlot(i);
                                if(n > proSlot.vitality) {
                                    return error("Attack - n>v");
@@ -237,6 +238,7 @@ var Attack = { make:
                                    }
                                }
                                oppSlot.vitality = newVitality;
+                               return id;
                            };
                            h.card = "AttackN";
                            return h;
@@ -280,15 +282,19 @@ var Help = { make:
                              if(n > paySlot.vitality) {
                                  return error("Help - n > v");
                              }
+                             print("Help " + i + ", " + j + ", " + n);
+                             print("Paying at " + paySlot.vitality);
+
                              paySlot.vitality -= n;
 
                              if(!machine.validSlot(j)) {
                                  return error("Help - j");
                              }
-                             var gainSlot = machine.getProponentSlotOpposite(j);
+                             var gainSlot = machine.getProponentSlot(j);
                              var newVitality;
                              if(!machine.zombie) {
-                                 newVitality = gainSlot + Math.floor((11/10) * n);
+                                 print("Gaining at " + gainSlot.vitality);
+                                 newVitality = gainSlot.vitality + Math.floor((11/10) * n);
                                  if(newVitality > machine.maxVitality) {
                                      newVitality = machine.maxVitality;
                                  }
@@ -300,6 +306,8 @@ var Help = { make:
                                  }
 
                              }
+                             gainSlot.vitality = newVitality;
+                             machine.print();
                              return id;
                          };
                          h.card = "HelpN";

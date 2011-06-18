@@ -2,7 +2,7 @@ function selectPlan(machine) {
     print("planselect");
     return mkChain(mkChain(mkNum(machine, 0, 54),
                            mkCopy(machine, 0, 7)),
-                   mkApply(machine,5,7));
+                   mkApply(machine, 5, 7));
 }
 
 function play(machine) {
