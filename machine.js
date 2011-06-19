@@ -74,7 +74,7 @@ Machine.prototype.endTurn = function() {
 
 Machine.prototype.invoke = function(f, arg) {
     if(this.calls > this.callLimit) {
-        throw {tag: "interp", extra: "Call limit reached"};
+        throw {tag: "limit", extra: "Call limit reached"};
     }
     this.calls += 1;
     return f(arg);
@@ -135,6 +135,10 @@ Machine.prototype.leftApply = function(slot, card) {
             print("Interp error: " + e.extra);
             slot.field = Ident.make(this);
         }
+        if(e.tag === "limit") {
+            print("Call limit reached.");
+            slot.field = Ident.make(this);
+        }
         else {
             print("Non-interp error " + e);
         }
@@ -155,6 +159,10 @@ Machine.prototype.rightApply = function(slot, card) {
     catch(e) {
         if(e.tag === "interp") {
             print("Interp error: " + e.extra);
+            slot.field = Ident.make(this);
+        }
+        if(e.tag === "limit") {
+            print("Call limit reached.");
             slot.field = Ident.make(this);
         }
         else {
