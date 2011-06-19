@@ -1,4 +1,4 @@
-function id(x) { return x; }
+var id = function(x) { return x; }
 id.card = "I";
 
 var DEBUG = false;
@@ -10,7 +10,7 @@ function error(extra) {
 }
 
 var wrap = function(machine, f) {
-    var wrapped = function(arg) { return machine.call(f, arg); }
+    var wrapped = function(arg) { return machine.invoke(f, arg); }
     wrapped.card = f.card;
     return wrapped;
 }
@@ -19,7 +19,7 @@ var Ident = { make:
               function(machine) { 
                   var f = function(x) { return x; };
                   f.card = "I";
-                  return wrap(machine, f);
+                  return wrap(machine, id);
               }};
 
 var Zero = { make:
@@ -101,7 +101,7 @@ var S = { make:
                           }
                           var y = g(x);
                           if(typeof h !== "function") {
-                              return error("S - h");
+                              return error("S - h: " + h);
                           }
                           var z = h(y);
                           return z;
@@ -231,7 +231,7 @@ var Attack = { make:
                                }
                                var oppSlot = machine.getOpponentSlotOpposite(j);
                                if(machine.deadSlot(oppSlot)) {
-                                   return id;
+                                   return wrap(machine, id);
                                }
                                var newVitality;
                                if(!machine.zombie) {

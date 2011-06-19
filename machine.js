@@ -1,9 +1,8 @@
-var id = function(x) { return x; }
-
 var Machine = function(maxSlots, maxVitality, initVitality) {
+    var me = this;
     var initSlots = function(slots) { 
         for(var i = 0; i < maxSlots; i++) {
-            slots[i] = {field : id,
+            slots[i] = {field : Ident.make(me),
                         vitality : initVitality};
         }
     }
@@ -73,7 +72,7 @@ Machine.prototype.endTurn = function() {
     this.proponent = 1 - this.proponent;
 }
 
-Machine.prototype.call = function(f, arg) {
+Machine.prototype.invoke = function(f, arg) {
     if(this.calls > this.callLimit) {
         throw {tag: "interp", extra: "Call limit reached"};
     }
@@ -125,7 +124,7 @@ Machine.prototype.leftApply = function(slot, card) {
     try {
         var fn = card.make(this);
         if(typeof fn !== 'function') {
-            slot.field = id;
+            slot.field = Ident.make(this);
             return;
         }
         var result = card.make(this)(slot.field);
@@ -134,7 +133,7 @@ Machine.prototype.leftApply = function(slot, card) {
     catch(e) {
         if(e.tag === "interp") {
             print("Interp error: " + e.extra);
-            slot.field = id;
+            slot.field = Ident.make(this);
         }
         else {
             print("Non-interp error " + e);
@@ -147,7 +146,7 @@ Machine.prototype.rightApply = function(slot, card) {
     try {
         var fn = slot.field;
         if(typeof fn !== 'function') {
-            slot.field = id;
+            slot.field = Ident.make(this);
             return;
         }
         var result = slot.field(card.make(this));
@@ -156,7 +155,7 @@ Machine.prototype.rightApply = function(slot, card) {
     catch(e) {
         if(e.tag === "interp") {
             print("Interp error: " + e.extra);
-            slot.field = id;
+            slot.field = Ident.make(this);
         }
         else {
             print("Non-interp error: " + e);
@@ -169,8 +168,8 @@ Machine.prototype.zombieMoves = function() {
     for(var i = 0; i < this.slots[this.proponent].length; i++) {
         var slot = this.slots[this.proponent][i];
         if(slot.vitality === -1) {
-            slot.field(id);
-            slot.field = id;
+            slot.field(Ident.make(this));
+            slot.field = Ident.make(this);
         }
     }
     this.zombie = false;
