@@ -19,38 +19,33 @@ module Main.Interactive (
 
 import LTG.Game
 import LTG.Play
+import Main.Players
 import Main.Utils
 import System.IO
 
 altMain :: IO ()
-altMain = interactiveStartup >> playAlt 1 initState
+altMain = interactiveMain$ twoPlayerTurn (interactivePlayer "0") (interactivePlayer "1")
 
 onlyMain :: IO ()
-onlyMain = interactiveStartup >> playOneSided 1 initState
+onlyMain = interactiveMain $ onePlayerTurn (interactivePlayer "0")
 
-interactiveStartup :: IO ()
-interactiveStartup = do
+
+interactiveMain :: Turn -> IO ()
+interactiveMain t = do
     putStrLn "FluShot LTG"
     hSetBuffering stdin LineBuffering
     hSetBuffering stdout LineBuffering
+    takeTurns $ interactiveTurn t
 
 
-playAlt :: Int -> State -> IO ()
-playAlt turn s = do
-    putStrLn $ "###### turn " ++ show turn
-    s0 <- switchSides `fmap` playTurn "0" s
-    s1 <- switchSides `fmap` playTurn "1" s0
-    playAlt (turn + 1) s1
+interactiveTurn :: Turn -> Turn
+interactiveTurn t = \n s -> do
+    putStrLn $ "###### turn " ++ show n
+    t n s
 
 
-playOneSided :: Int -> State -> IO ()
-playOneSided turn s = do
-    putStrLn $ "###### turn " ++ show turn
-    playTurn "0" s >>= playOneSided (turn + 1)
-
-
-playTurn :: String -> State -> IO State
-playTurn p s = do
+interactivePlayer :: String -> Player
+interactivePlayer p s = do
     putStrLn $ "*** player " ++ p ++ "'s turn, with slots:"
     mapM_ putStrLn $ showProState s
     putStrLn "(1) apply card to slot, or (2) apply slot to card?"
@@ -60,21 +55,21 @@ playTurn p s = do
         Just LeftApply -> cardThenSlot
         Just RightApply -> slotThenCard
   where
-    reportError msg = putStrLn ("Exception: Failure(" ++ show msg ++ ")") >> return s
+    reportError msg = putStrLn ("Exception: Failure(" ++ show msg ++ ")") >> return nullMove
     reportApply a b = putStrLn $ "player " ++ p ++ " applied " ++ a ++ " to " ++ b
     cardThenSlot = do
         putStrLn "card name?"
         mc <- readCard `fmap` getLine
         case mc of
             Nothing -> reportError "unknown card"
-            Just (cn, c) -> do
+            Just c@(cn, _) -> do
                 putStrLn "slot no?"
                 ms <- readSlot `fmap` getLine
                 case ms of
                     Nothing -> reportError "not a slot"
                     Just i -> do
                         reportApply ("card " ++ cn) ("slot " ++ show i)
-                        return $ execute (play LeftApply i c) s
+                        return $ LeftMove c i
 
     slotThenCard = do
         putStrLn "slot no?"
@@ -86,9 +81,9 @@ playTurn p s = do
                 mc <- readCard `fmap` getLine
                 case mc of
                     Nothing -> reportError "not a slot"
-                    Just (cn, c) -> do
+                    Just c@(cn, _) -> do
                         reportApply ("slot " ++ show i) ("card " ++ cn)
-                        return $ execute (play RightApply i c) s
+                        return $ RightMove i c
 
 
 
